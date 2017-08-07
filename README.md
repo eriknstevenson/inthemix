@@ -9,6 +9,14 @@ $ go install github.com/narrative/inthemix
 $ $GOPATH/bin/inthemix -token=[discord bot token]
 ```
 
+## Commands
+
+command | description
+---|---
+!help | displays available commands
+!talent | displays available podcasts
+!latest [talent] | provides link to latest episode
+
 ## Planned Features
 
 - New episode alerts
