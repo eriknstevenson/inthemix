@@ -19,5 +19,5 @@ command | description
 
 ## Planned Features
 
-- New episode alerts
-- Configuration file for feed listing
+-[ ] New episode alerts
+-[x] Configuration file for feed listing
