@@ -1,0 +1,22 @@
+[
+  {
+    "name": "spinninsessions",
+    "url":"http://spinninsessions.spinninpodcasts.com/rss"
+  },
+  {
+    "name": "tritonia",
+    "url": "http://tritonia.libsyn.com/rss"
+  },
+  {
+    "name": "hexagon",
+    "url": "https://www.thisisdistorted.com/repository/xml/DonDiabloHexagonRadio1422895802.xml"
+  }, 
+  {
+    "name": "hardwell",
+    "url": "http://podcast.djhardwell.com/podcast.xml"
+  },
+  {
+    "name": "tiesto",
+    "url": "https://feed.pippa.io/public/shows/clublife-by-tiesto"
+  }
+]

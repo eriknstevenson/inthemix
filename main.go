@@ -1,29 +1,18 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
-	"net/url"
 	"os"
 	"os/signal"
-	"sort"
 	"strings"
 	"syscall"
 
-	"github.com/mmcdole/gofeed"
-	"github.com/narrative/inthemix/engine"
+	"github.com/narrative/inthemix/core"
 )
 
 var (
-	token    string
-	podcasts = map[string]string{
-		"spinninsessions": "http://spinninsessions.spinninpodcasts.com/rss",
-		"tritonia":        "http://tritonia.libsyn.com/rss",
-		"hexagon":         "https://www.thisisdistorted.com/repository/xml/DonDiabloHexagonRadio1422895802.xml",
-		"hardwell":        "http://podcast.djhardwell.com/podcast.xml",
-		"tiesto":          "https://feed.pippa.io/public/shows/clublife-by-tiesto",
-	}
+	token string
 )
 
 func init() {
@@ -39,28 +28,18 @@ func main() {
 		return
 	}
 
-	te, err := engine.Initialize(token)
+	pool, err := core.FillPool("talentpool.json")
+	if err != nil {
+		fmt.Println("Unable to read talent pool file: ", err)
+	}
+
+	te, err := core.Initialize(token)
 	if err != nil {
 		fmt.Println("Error initializing trigger engine: ", err)
 		return
 	}
 	defer te.Close()
-	addTriggers(te)
-	err = te.Open()
 
-	if err != nil {
-		fmt.Println("Error opening connection: ", err)
-		return
-	}
-
-	fmt.Println("InTheMix is running. Press CTRL-C to exit.")
-	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
-	<-sc
-
-}
-
-func addTriggers(te *engine.TriggerEngine) {
 	te.AddTrigger("help", func(msg string) bool {
 		return msg == "help"
 	}, func(args []string) {
@@ -81,10 +60,10 @@ func addTriggers(te *engine.TriggerEngine) {
 			te.SendReply("Please specify a talent. Use !talent to view a list of available talent.")
 			return
 		}
-		talent := args[0]
-		title, url, err := getLatest(talent)
+		artistName := args[0]
+		title, url, err := pool.GetLatest(artistName)
 		if err != nil {
-			te.SendReply(fmt.Sprintf("Error getting latest episode: %v", err))
+			te.SendReply("Unknown talent. Use !talent to view a list of available talent.")
 			return
 		}
 		te.SendReply(fmt.Sprintf("Get in the mix with %v: %v", title, url))
@@ -93,55 +72,20 @@ func addTriggers(te *engine.TriggerEngine) {
 	te.AddTrigger("talent", func(msg string) bool {
 		return msg == "talent"
 	}, func(_ []string) {
-		djs := getDjs()
+		djs := pool.GetDjs()
 		te.SendReply("Current talent pool: " + strings.Join(djs, ", ") + ".")
 	})
-}
 
-func getDjs() (djs []string) {
-	for djName := range podcasts {
-		djs = append(djs, djName)
-	}
-	return
-}
+	err = te.Open()
 
-func getLatest(dj string) (string, *url.URL, error) {
-
-	dj = strings.ToLower(strings.TrimSpace(dj))
-	fp := gofeed.NewParser()
-
-	feedURL, ok := podcasts[dj]
-	if !ok {
-		return "", nil, errors.New("unknown talent")
-	}
-
-	feed, err := fp.ParseURL(feedURL)
 	if err != nil {
-		return "", nil, err
+		fmt.Println("Error opening connection: ", err)
+		return
 	}
 
-	latestItem := latestEpisodeFromFeed(feed)
-	url, err := url.Parse(latestItem.Enclosures[0].URL)
-	if err != nil {
-		return "", nil, err
-	}
+	fmt.Println("InTheMix is running. Press CTRL-C to exit.")
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	<-sc
 
-	return latestItem.Title, url, nil
-}
-
-type byDate []*gofeed.Item
-
-func (a byDate) Len() int {
-	return len(a)
-}
-func (a byDate) Swap(i, j int) {
-	a[i], a[j] = a[j], a[i]
-}
-func (a byDate) Less(i, j int) bool {
-	return a[i].PublishedParsed.After(*(a[j].PublishedParsed))
-}
-
-func latestEpisodeFromFeed(feed *gofeed.Feed) *gofeed.Item {
-	sort.Sort(byDate(feed.Items))
-	return feed.Items[0]
 }

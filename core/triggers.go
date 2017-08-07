@@ -1,4 +1,4 @@
-package engine
+package core
 
 import (
 	"fmt"
@@ -12,14 +12,16 @@ type trigger struct {
 	matches func(string) bool
 	action  func([]string)
 }
-type TriggerEngine struct {
+
+type TriggerSystem struct {
 	s        *discordgo.Session
 	m        *discordgo.MessageCreate
 	triggers []trigger
 }
 
-func Initialize(token string) (*TriggerEngine, error) {
-	te := new(TriggerEngine)
+//
+func Initialize(token string) (*TriggerSystem, error) {
+	te := new(TriggerSystem)
 	s, err := discordgo.New("Bot " + token)
 	te.s = s
 	if err != nil {
@@ -32,24 +34,23 @@ func Initialize(token string) (*TriggerEngine, error) {
 	return te, nil
 }
 
-func (te *TriggerEngine) Close() {
+func (te *TriggerSystem) Close() {
 	te.s.Close()
 }
 
-func (te *TriggerEngine) Open() error {
+func (te *TriggerSystem) Open() error {
 	return te.s.Open()
 }
 
-func (te *TriggerEngine) AddTrigger(name string, matches func(string) bool, action func([]string)) {
-	//matches, action := f(te)
+func (te *TriggerSystem) AddTrigger(name string, matches func(string) bool, action func([]string)) {
 	te.triggers = append(te.triggers, trigger{name: name, matches: matches, action: action})
 }
 
-func (te *TriggerEngine) SendReply(message string) {
+func (te *TriggerSystem) SendReply(message string) {
 	te.s.ChannelMessageSend(te.m.ChannelID, message)
 }
 
-func (te *TriggerEngine) RunTriggerReader(s *discordgo.Session, m *discordgo.MessageCreate) {
+func (te *TriggerSystem) RunTriggerReader(s *discordgo.Session, m *discordgo.MessageCreate) {
 	te.s = s
 	te.m = m
 
@@ -63,14 +64,14 @@ func (te *TriggerEngine) RunTriggerReader(s *discordgo.Session, m *discordgo.Mes
 	}
 }
 
-func (te *TriggerEngine) GetAvailableCommands() (result []string) {
+func (te *TriggerSystem) GetAvailableCommands() (result []string) {
 	for _, trigger := range te.triggers {
 		result = append(result, trigger.name)
 	}
 	return
 }
 
-func messageCreate(te *TriggerEngine) func(*discordgo.Session, *discordgo.MessageCreate) {
+func messageCreate(te *TriggerSystem) func(*discordgo.Session, *discordgo.MessageCreate) {
 	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if m.Author.ID == s.State.User.ID || m.Content[0] != '!' {
 			return
