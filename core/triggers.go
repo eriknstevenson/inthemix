@@ -19,7 +19,6 @@ type TriggerSystem struct {
 	triggers []trigger
 }
 
-//
 func Initialize(token string) (*TriggerSystem, error) {
 	te := new(TriggerSystem)
 	s, err := discordgo.New("Bot " + token)
@@ -73,7 +72,7 @@ func (te *TriggerSystem) GetAvailableCommands() (result []string) {
 
 func messageCreate(te *TriggerSystem) func(*discordgo.Session, *discordgo.MessageCreate) {
 	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if m.Author.ID == s.State.User.ID || m.Content[0] != '!' {
+		if m.Author.ID == s.State.User.ID || !strings.HasPrefix(m.Content, "!") {
 			return
 		}
 		te.RunTriggerReader(s, m)

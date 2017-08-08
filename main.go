@@ -77,7 +77,6 @@ func main() {
 	})
 
 	err = te.Open()
-
 	if err != nil {
 		fmt.Println("Error opening connection: ", err)
 		return

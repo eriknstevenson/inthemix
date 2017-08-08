@@ -18,5 +18,9 @@
   {
     "name": "tiesto",
     "url": "https://feed.pippa.io/public/shows/clublife-by-tiesto"
+  }, 
+  {
+    "name": "asot",
+    "url": "http://podcast.armadamusic.com/asot/podcast.xml"
   }
 ]
