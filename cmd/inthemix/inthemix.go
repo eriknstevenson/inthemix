@@ -8,7 +8,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/narrative/inthemix/core"
+	"github.com/narrative/inthemix"
 )
 
 var (
@@ -28,12 +28,12 @@ func main() {
 		return
 	}
 
-	pool, err := core.FillPool("talentpool.json")
+	pool, err := inthemix.FillPool("talentpool.json")
 	if err != nil {
 		fmt.Println("Unable to read talent pool file: ", err)
 	}
 
-	te, err := core.Initialize(token)
+	te, err := inthemix.Initialize(token)
 	if err != nil {
 		fmt.Println("Error initializing trigger engine: ", err)
 		return
