@@ -5,7 +5,7 @@ Simple discord bot that can be used to fetch links to latest episodes of podcast
 ## Usage
 
 ```
-$ go install github.com/narrative/inthemix
+$ go install github.com/narrative/inthemix/...
 $ $GOPATH/bin/inthemix -token=[discord bot token]
 ```
 
